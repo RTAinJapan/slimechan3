@@ -3,13 +3,19 @@ import {joinGames} from "@/lib/xlsx/join";
 import {loadFixture} from "./helpers";
 
 const raw = loadFixture();
-const {games, backups} = joinGames(raw);
+const {games, backups, trailingEvents} = joinGames(raw);
 const byPk = new Map(games.map((g) => [g.pk, g]));
 
 describe("joinGames", () => {
 	it("schedule 順の games と backups を返す", () => {
 		expect(games.map((g) => g.pk)).toEqual([101, 102, 103]);
 		expect(backups.map((g) => g.pk)).toEqual([201]);
+	});
+
+	it("最終ゲーム以降の進行を trailingEvents として返す", () => {
+		expect(trailingEvents).toEqual([
+			{date: "2025/08/09", time: "12:00", title: "エンディング"},
+		]);
 	});
 
 	it("投票（複数）・メモ・タイマーを pk / 名前で join する", () => {

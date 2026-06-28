@@ -1,6 +1,11 @@
 // 各シートの解析結果を pk で突き合わせ、集約済み Game[] を組み立てる純関数。
 
-import type {Commentator, Game, TimelineEntry} from "@/lib/domain/types";
+import type {
+	Commentator,
+	Game,
+	ScheduleEvent,
+	TimelineEntry,
+} from "@/lib/domain/types";
 import {buildScheduleTimeline} from "@/lib/domain/timeline";
 import {
 	SHEET,
@@ -34,7 +39,12 @@ const mergeCommentators = (
 
 export const joinGames = (
 	raw: RawWorkbook,
-): {games: Game[]; backups: Game[]; timeline: TimelineEntry[]} => {
+): {
+	games: Game[];
+	backups: Game[];
+	timeline: TimelineEntry[];
+	trailingEvents: ScheduleEvent[];
+} => {
 	const {games: scheduleGames, trailingEvents} = parseScheduleSheet(
 		raw[SHEET.schedule] ?? [],
 	);
@@ -68,5 +78,6 @@ export const joinGames = (
 		games,
 		backups: backupGames.map(enrich),
 		timeline: buildScheduleTimeline(games, trailingEvents),
+		trailingEvents,
 	};
 };

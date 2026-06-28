@@ -107,9 +107,20 @@ export default function Home() {
 	const nextDisabled = !list.length || currentIndex === list.length - 1;
 
 	// ゲーム外の進行を、実施タイミングに対応する位置へ独立ブロックで表示する。
+	// 最終ゲーム以降の進行（全ゲーム終了・ED 等）は trailingEvents として、
+	// 現在/次が最終ゲームのときにその下へ表示する。
+	const trailingEvents = games?.trailingEvents ?? [];
 	const eventsBeforeCurrent = trio.current?.precedingEvents ?? []; // 現在の前
-	const eventsAfterCurrent = trio.next?.precedingEvents ?? []; // 現在の直後（次の前）
-	const eventsAfterNext = trio.nextNext?.precedingEvents ?? []; // 次の後（次の次の前）
+	const eventsAfterCurrent = trio.next // 現在の直後（次の前 / 現在が最終なら trailing）
+		? trio.next.precedingEvents
+		: trio.current
+			? trailingEvents
+			: [];
+	const eventsAfterNext = trio.nextNext // 次の後（次が最終なら trailing）
+		? trio.nextNext.precedingEvents
+		: trio.next
+			? trailingEvents
+			: [];
 
 	// 今/次/次の次の投票項目の bid 進捗をまとめて取得する。
 	const bidIds = useMemo(() => {

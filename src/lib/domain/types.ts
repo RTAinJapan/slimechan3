@@ -97,6 +97,7 @@ export type GamesData = {
 	games: Game[]; // schedule 順
 	backups: Game[];
 	timeline: TimelineEntry[]; // schedule シート全体（ゲーム＋進行イベント群）
+	trailingEvents: ScheduleEvent[]; // 最終ゲーム以降の進行（全ゲーム終了・ED 等）
 	volunteer: VolunteerTable;
 	fetchedAt: number;
 	stale: boolean;

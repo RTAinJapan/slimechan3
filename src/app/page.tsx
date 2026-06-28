@@ -110,7 +110,9 @@ export default function Home() {
 	const eventGroups = useMemo(
 		() => [
 			{
-				label: "このあと（次のゲームまで）",
+				label: trio.current
+					? "このあと（次のゲームまで）"
+					: "最初のゲームまでの進行（開始前）",
 				events: trio.next?.precedingEvents ?? [],
 			},
 			{

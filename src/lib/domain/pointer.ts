@@ -16,7 +16,11 @@ export const computeTrio = (
 	currentPk: number | null | undefined,
 	lookup?: Map<number, Game>,
 ): Trio => {
-	if (currentPk === null || currentPk === undefined) return {};
+	if (currentPk === null || currentPk === undefined) {
+		// 現在のゲーム未確定（イベント開始前など）。先頭ゲームを「次」として案内し、
+		// その直前のゲーム外進行（開始前に流す動画など）を表示できるようにする。
+		return {current: undefined, next: games[0], nextNext: games[1]};
+	}
 	const i = games.findIndex((g) => g.pk === currentPk);
 	if (i === -1) {
 		const current = lookup?.get(currentPk);

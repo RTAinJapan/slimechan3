@@ -44,8 +44,11 @@ describe("computeTrio", () => {
 		expect(t.nextNext).toBeUndefined();
 	});
 
-	it("currentPk が null なら空", () => {
-		expect(computeTrio(games, null, lookup)).toEqual({});
+	it("currentPk が null なら先頭ゲームを次として案内する（開始前）", () => {
+		const t = computeTrio(games, null, lookup);
+		expect(t.current).toBeUndefined();
+		expect(t.next?.pk).toBe(101);
+		expect(t.nextNext?.pk).toBe(102);
 	});
 
 	it("schedule に無い pk は lookup から current を解決し警告を付ける", () => {

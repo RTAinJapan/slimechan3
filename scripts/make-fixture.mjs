@@ -86,6 +86,7 @@ const schedule = [
 		"runner_c",
 		"disc_c",
 	],
+	["11:25", "CM動画再生"], // ゲーム以外の進行イベント（Gamma Gear の直前）
 	[
 		"11:30",
 		"Gamma Gear",

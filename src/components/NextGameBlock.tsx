@@ -56,6 +56,26 @@ export const NextGameBlock = ({
 							/>
 						)}
 					</Stack>
+					{game.precedingEvents.length > 0 && (
+						<Box
+							sx={{
+								borderLeft: 3,
+								borderColor: "warning.main",
+								pl: 1,
+								py: 0.5,
+							}}
+						>
+							<Typography variant='caption' color='warning.main'>
+								このゲームまでの進行
+							</Typography>
+							{game.precedingEvents.map((e, i) => (
+								<Typography key={i} variant='body2'>
+									{e.time ? `${e.time}　` : ""}
+									{e.title}
+								</Typography>
+							))}
+						</Box>
+					)}
 					<Box>
 						<Typography variant='caption' color='text.secondary'>
 							走者

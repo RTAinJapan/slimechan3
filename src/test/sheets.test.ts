@@ -34,6 +34,22 @@ describe("parseScheduleSheet", () => {
 		expect(a.time).toBe("10:05");
 	});
 
+	it("ゲーム以外の進行行を直前ゲームの precedingEvents に紐付ける", () => {
+		// 「配信開始」は Alpha Quest(101) の前、「CM動画再生」は Gamma Gear(103) の前。
+		expect(games[0]!.precedingEvents).toEqual([
+			{date: "2025/08/09", time: "10:00", title: "配信開始"},
+		]);
+		expect(games[1]!.precedingEvents).toEqual([]);
+		expect(games[2]!.precedingEvents).toEqual([
+			{date: "2025/08/09", time: "11:25", title: "CM動画再生"},
+		]);
+	});
+
+	it("日付だけの区切り行はイベントに含めない", () => {
+		const all = games.flatMap((g) => g.precedingEvents.map((e) => e.title));
+		expect(all).not.toContain("2025/08/09");
+	});
+
 	it("runner と解説を動的列から解析する", () => {
 		expect(games[0]!.runners).toEqual([
 			{name: "runner_a", discordId: undefined},

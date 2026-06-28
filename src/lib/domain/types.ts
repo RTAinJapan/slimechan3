@@ -48,6 +48,14 @@ export type TimerTiming = {
 	referenceVideo?: string; // 参考動画
 };
 
+// schedule のゲーム以外の進行行（CM動画再生・配信枠の立て直し・配信開始・OP など）。
+// 日付だけの区切り行は含まない。
+export type ScheduleEvent = {
+	date?: string;
+	time?: string;
+	title: string;
+};
+
 export type Game = {
 	pk: number; // join キー（schedule.pkId）
 	scheduleOrder: number; // ゲーム行の並び順（行番号ではない）
@@ -67,6 +75,8 @@ export type Game = {
 	votings: Voting[];
 	memo?: GameMemo;
 	timerTiming?: TimerTiming;
+	// 前のゲーム（または当日開始）からこのゲームまでの間の進行イベント。
+	precedingEvents: ScheduleEvent[];
 	isBackup?: boolean;
 };
 

@@ -6,6 +6,7 @@ import type {
 	Game,
 	GameMemo,
 	Runner,
+	ScheduleEvent,
 	TimerTiming,
 	VolunteerTable,
 	Voting,
@@ -100,14 +101,23 @@ export const parseScheduleSheet = (rows: RawRow[]): Game[] => {
 	const games: Game[] = [];
 	let order = 0;
 	let currentDate: string | undefined;
+	let pendingEvents: ScheduleEvent[] = [];
 	for (let r = 2; r < rows.length; r++) {
 		const row = rows[r] ?? [];
 		const pk = toNum(row[3]); // pkId
 		if (pk === undefined) {
-			// 日付区切り行（先頭セルが日付）なら以降のゲームの日付として記憶する。
 			const c0 = str(row[0]);
-			if (c0 && DATE_RE.test(c0)) currentDate = c0;
-			continue; // 日付区切り行・非ゲーム行
+			const rowTitle = str(row[1]);
+			// 日付だけの区切り行（先頭セルが日付・名称なし）は無視し、以降の日付として記憶。
+			if (c0 && DATE_RE.test(c0) && !rowTitle) {
+				currentDate = c0;
+				continue;
+			}
+			// それ以外で名称がある行は、ゲーム以外の進行イベント（CM・立て直し等）。
+			if (rowTitle) {
+				pendingEvents.push({date: currentDate, time: c0, title: rowTitle});
+			}
+			continue;
 		}
 		const title = str(row[1]);
 		if (!title) continue;
@@ -147,7 +157,9 @@ export const parseScheduleSheet = (rows: RawRow[]): Game[] => {
 			runners,
 			commentators,
 			votings: [],
+			precedingEvents: pendingEvents,
 		});
+		pendingEvents = [];
 	}
 	return games;
 };
@@ -191,6 +203,7 @@ export const parseBackupSheet = (rows: RawRow[]): Game[] => {
 			runners,
 			commentators: [],
 			votings: [],
+			precedingEvents: [],
 			isBackup: true,
 		});
 	}

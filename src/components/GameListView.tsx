@@ -2,6 +2,7 @@
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -9,16 +10,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import {useRouter} from "next/navigation";
 import {useAppState} from "@/components/Providers";
-import type {Game} from "@/lib/domain/types";
+import type {Game, TimelineEntry} from "@/lib/domain/types";
 
 export const GameListView = ({
-	games,
+	timeline,
 	backups,
 }: {
-	games: Game[];
+	timeline: TimelineEntry[];
 	backups: Game[];
 }) => {
 	const router = useRouter();
@@ -30,21 +32,44 @@ export const GameListView = ({
 		router.push("/");
 	};
 
-	const renderRows = (list: Game[]) =>
-		list.map((g) => (
-			<TableRow key={g.pk} selected={manualPk === g.pk} hover>
-				<TableCell>{g.time ?? "-"}</TableCell>
-				<TableCell>{g.title}</TableCell>
-				<TableCell>{g.category ?? "-"}</TableCell>
-				<TableCell>{g.platform ?? "-"}</TableCell>
-				<TableCell>{g.runners.map((r) => r.name).join(", ") || "-"}</TableCell>
-				<TableCell align='right'>
-					<Button size='small' onClick={() => setCurrent(g.pk)}>
-						現在に設定
-					</Button>
-				</TableCell>
-			</TableRow>
-		));
+	const gameRow = (g: Game) => (
+		<TableRow key={`game-${g.pk}`} selected={manualPk === g.pk} hover>
+			<TableCell>{g.time ?? "-"}</TableCell>
+			<TableCell>{g.title}</TableCell>
+			<TableCell>{g.category ?? "-"}</TableCell>
+			<TableCell>{g.platform ?? "-"}</TableCell>
+			<TableCell>{g.runners.map((r) => r.name).join(", ") || "-"}</TableCell>
+			<TableCell align='right'>
+				<Button size='small' onClick={() => setCurrent(g.pk)}>
+					現在に設定
+				</Button>
+			</TableCell>
+		</TableRow>
+	);
+
+	// 連続する進行イベントは 1 行にまとめて表示する。
+	const eventsRow = (
+		entry: Extract<TimelineEntry, {kind: "events"}>,
+		i: number,
+	) => (
+		<TableRow key={`events-${i}`} sx={{bgcolor: "action.hover"}}>
+			<TableCell>{entry.events[0]?.time ?? ""}</TableCell>
+			<TableCell colSpan={5}>
+				<Stack direction='row' spacing={1} alignItems='center' sx={{mb: 0.5}}>
+					<Chip size='small' color='warning' variant='outlined' label='進行' />
+					<Typography variant='caption' color='text.secondary'>
+						ゲーム外（{entry.events.length}件）
+					</Typography>
+				</Stack>
+				{entry.events.map((e, j) => (
+					<Typography key={j} variant='body2'>
+						{e.time ? `${e.time}　` : ""}
+						{e.title}
+					</Typography>
+				))}
+			</TableCell>
+		</TableRow>
+	);
 
 	const headerRow = (
 		<TableRow>
@@ -78,7 +103,11 @@ export const GameListView = ({
 			>
 				<Table size='small' stickyHeader>
 					<TableHead>{headerRow}</TableHead>
-					<TableBody>{renderRows(games)}</TableBody>
+					<TableBody>
+						{timeline.map((entry, i) =>
+							entry.kind === "game" ? gameRow(entry.game) : eventsRow(entry, i),
+						)}
+					</TableBody>
 				</Table>
 			</TableContainer>
 
@@ -92,7 +121,7 @@ export const GameListView = ({
 					>
 						<Table size='small' stickyHeader>
 							<TableHead>{headerRow}</TableHead>
-							<TableBody>{renderRows(backups)}</TableBody>
+							<TableBody>{backups.map((g) => gameRow(g))}</TableBody>
 						</Table>
 					</TableContainer>
 				</>

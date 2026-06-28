@@ -86,8 +86,10 @@ const pkFromCategory = (v: string | null | undefined): number | undefined => {
 // ヘッダは 2 行。固定列 0..10 ＋ runner ブロック ＋ 解説ブロック。
 // runner / 解説 の列はグループ見出し行(0 行目)から動的に検出する（列追加に強い）。
 
-export const parseScheduleSheet = (rows: RawRow[]): Game[] => {
-	if (rows.length < 2) return [];
+export const parseScheduleSheet = (
+	rows: RawRow[],
+): {games: Game[]; trailingEvents: ScheduleEvent[]} => {
+	if (rows.length < 2) return {games: [], trailingEvents: []};
 	const groupRow = rows[0] ?? [];
 	const runnerCols: number[] = [];
 	const commentatorCols: number[] = [];
@@ -161,7 +163,8 @@ export const parseScheduleSheet = (rows: RawRow[]): Game[] => {
 		});
 		pendingEvents = [];
 	}
-	return games;
+	// 最後のゲーム以降に残った進行イベント（エンディング等）。
+	return {games, trailingEvents: pendingEvents};
 };
 
 // --- バックアップ（schedule と似た列だが解説ブロックは無いことが多い）---

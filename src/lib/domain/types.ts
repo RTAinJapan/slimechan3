@@ -85,10 +85,15 @@ export type VolunteerTable = {
 	rows: string[][];
 };
 
+// schedule の並び順を、ゲームと「連続する進行イベント群」で表したタイムライン。
+export type TimelineEntry =
+	{kind: "game"; game: Game} | {kind: "events"; events: ScheduleEvent[]};
+
 // /api/games のレスポンス形。
 export type GamesData = {
 	games: Game[]; // schedule 順
 	backups: Game[];
+	timeline: TimelineEntry[]; // schedule シート全体（ゲーム＋進行イベント群）
 	volunteer: VolunteerTable;
 	fetchedAt: number;
 	stale: boolean;

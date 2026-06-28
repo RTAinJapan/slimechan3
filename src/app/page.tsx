@@ -1,15 +1,21 @@
 "use client";
 
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
+import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {CurrentGameBlock} from "@/components/CurrentGameBlock";
 import {ManualGamePicker} from "@/components/ManualGamePicker";
 import {MenuBar} from "@/components/MenuBar";
 import {NextGameBlock} from "@/components/NextGameBlock";
+import {UpcomingEvents} from "@/components/UpcomingEvents";
 import {useAppState} from "@/components/Providers";
 import {
 	useBidProgress,
@@ -81,6 +87,39 @@ export default function Home() {
 	const warning = trio.currentNotInSchedule
 		? "このゲームは schedule に存在しません（バックアップの可能性）。"
 		: undefined;
+
+	// 手動選択の前/次の矢印。現在位置を基準に games を 1 つずつ移動する。
+	const currentIndex = useMemo(
+		() => list.findIndex((g) => g.pk === currentPk),
+		[list, currentPk],
+	);
+	const stepTo = useCallback(
+		(delta: number) => {
+			if (!list.length) return;
+			const base = currentIndex >= 0 ? currentIndex : delta > 0 ? -1 : 0;
+			const next = Math.min(list.length - 1, Math.max(0, base + delta));
+			const target = list[next];
+			if (target) setManualPk(target.pk);
+		},
+		[list, currentIndex, setManualPk],
+	);
+	const prevDisabled = !list.length || currentIndex === 0;
+	const nextDisabled = !list.length || currentIndex === list.length - 1;
+
+	// ゲーム外の進行を独立要素として表示する（見落とし防止）。
+	const eventGroups = useMemo(
+		() => [
+			{
+				label: "このあと（次のゲームまで）",
+				events: trio.next?.precedingEvents ?? [],
+			},
+			{
+				label: "次の次のゲームまで",
+				events: trio.nextNext?.precedingEvents ?? [],
+			},
+		],
+		[trio],
+	);
 
 	// 今/次/次の次の投票項目の bid 進捗をまとめて取得する。
 	const bidIds = useMemo(() => {
@@ -159,15 +198,41 @@ export default function Home() {
 					</Alert>
 				)}
 				{showManual && list.length > 0 && (
-					<ManualGamePicker
-						games={list}
-						value={manualPk}
-						onChange={setManualPk}
-					/>
+					<Stack direction='row' spacing={0.5} alignItems='center'>
+						<Tooltip title='前のゲーム'>
+							<span>
+								<IconButton
+									size='small'
+									onClick={() => stepTo(-1)}
+									disabled={prevDisabled}
+								>
+									<ChevronLeftIcon />
+								</IconButton>
+							</span>
+						</Tooltip>
+						<ManualGamePicker
+							games={list}
+							value={manualPk}
+							onChange={setManualPk}
+						/>
+						<Tooltip title='次のゲーム'>
+							<span>
+								<IconButton
+									size='small'
+									onClick={() => stepTo(1)}
+									disabled={nextDisabled}
+								>
+									<ChevronRightIcon />
+								</IconButton>
+							</span>
+						</Tooltip>
+					</Stack>
 				)}
 			</Box>
 
 			{isLoading && <LinearProgress />}
+
+			<UpcomingEvents groups={eventGroups} />
 
 			<Box
 				sx={{

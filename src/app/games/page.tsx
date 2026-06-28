@@ -30,7 +30,9 @@ export default function GamesPage() {
 				{error && (
 					<Alert severity='error'>スプレッドシートを取得できません。</Alert>
 				)}
-				{data && <GameListView games={data.games} backups={data.backups} />}
+				{data && (
+					<GameListView timeline={data.timeline} backups={data.backups} />
+				)}
 			</Box>
 		</Box>
 	);

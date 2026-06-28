@@ -102,6 +102,7 @@ const schedule = [
 		"runner_d",
 		"disc_d",
 	],
+	["12:00", "エンディング"], // 最終ゲーム以降の進行イベント（trailing）
 ];
 XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(schedule), "schedule");
 

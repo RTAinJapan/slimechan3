@@ -15,10 +15,16 @@ import {loadFixture} from "./helpers";
 const raw = loadFixture();
 
 describe("parseScheduleSheet", () => {
-	const games = parseScheduleSheet(raw[SHEET.schedule] ?? []);
+	const {games, trailingEvents} = parseScheduleSheet(raw[SHEET.schedule] ?? []);
 
 	it("ゲーム行のみ（区切り行・非ゲーム行を除外）を返す", () => {
 		expect(games.map((g) => g.pk)).toEqual([101, 102, 103]);
+	});
+
+	it("最終ゲーム以降の進行イベントを trailingEvents に返す", () => {
+		expect(trailingEvents).toEqual([
+			{date: "2025/08/09", time: "12:00", title: "エンディング"},
+		]);
 	});
 
 	it("固定列を解析する", () => {

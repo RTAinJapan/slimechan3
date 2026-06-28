@@ -14,9 +14,16 @@ let inflight: Promise<GamesData> | null = null;
 const load = async (): Promise<GamesData> => {
 	const buf = await fetchXlsx(env.scheduleXlsxUrl);
 	const raw = workbookToRaw(buf);
-	const {games, backups} = joinGames(raw);
+	const {games, backups, timeline} = joinGames(raw);
 	const volunteer = parseVolunteerSheet(raw[SHEET.volunteer] ?? []);
-	return {games, backups, volunteer, fetchedAt: Date.now(), stale: false};
+	return {
+		games,
+		backups,
+		timeline,
+		volunteer,
+		fetchedAt: Date.now(),
+		stale: false,
+	};
 };
 
 export const getGamesData = async (): Promise<GamesData> => {

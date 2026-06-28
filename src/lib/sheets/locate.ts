@@ -21,6 +21,7 @@ export type SheetWriteConfig = {
 	runPkHeader: string;
 	closedHeader: string;
 	writeEnabled: boolean;
+	spreadsheetUrl: string; // ヘッダの「スプレッドシートを開く」用（無ければ空）
 };
 
 // 0-based の列番号を A1 列記号（A, B, ..., Z, AA, ...）に変換する。

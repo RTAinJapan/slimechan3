@@ -2,6 +2,7 @@
 
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -14,6 +15,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import {useAppState, useThemeMode} from "@/components/Providers";
+import {useClientConfig} from "@/lib/client/hooks";
 
 type Props = {
 	online?: boolean;
@@ -23,6 +25,7 @@ type Props = {
 export const MenuBar = ({online, showNav = true}: Props) => {
 	const {mode, toggle} = useThemeMode();
 	const {linked, setLinked} = useAppState();
+	const {data: clientConfig} = useClientConfig();
 
 	return (
 		<AppBar position='static' color='default' enableColorOnDark>
@@ -62,6 +65,19 @@ export const MenuBar = ({online, showNav = true}: Props) => {
 				)}
 
 				<Box sx={{flexGrow: 1}} />
+
+				{clientConfig?.spreadsheetUrl && (
+					<Button
+						component='a'
+						href={clientConfig.spreadsheetUrl}
+						target='_blank'
+						rel='noopener'
+						color='inherit'
+						startIcon={<OpenInNewIcon />}
+					>
+						スプレッドシート
+					</Button>
+				)}
 
 				{showNav && (
 					<>

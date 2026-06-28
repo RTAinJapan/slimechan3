@@ -16,6 +16,7 @@ export async function GET() {
 		runPkHeader: env.votingRunPkHeader,
 		closedHeader: env.votingClosedHeader,
 		writeEnabled: !!(env.googleClientId && env.editSpreadsheetId),
+		spreadsheetUrl: env.spreadsheetUrl,
 	};
 	return NextResponse.json(config);
 }

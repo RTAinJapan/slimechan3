@@ -5,6 +5,16 @@ const num = (v: string | undefined, fallback: number): number => {
 	return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
+const editSpreadsheetId = process.env.EDIT_SPREADSHEET_ID ?? "";
+
+// ヘッダの「スプレッドシートを開く」ボタン用 URL。
+// SPREADSHEET_URL 明示があればそれを、無ければ編集用 ID から編集 URL を組み立てる。
+const spreadsheetUrl =
+	process.env.SPREADSHEET_URL ??
+	(editSpreadsheetId
+		? `https://docs.google.com/spreadsheets/d/${editSpreadsheetId}/edit`
+		: "");
+
 export const env = {
 	scheduleXlsxUrl: process.env.SCHEDULE_XLSX_URL ?? "",
 	nodecgUrl: process.env.NODECG_URL ?? "http://localhost:9090",
@@ -23,7 +33,8 @@ export const env = {
 	// OAuth）。これらは秘密ではない（client secret は GIS トークンフローで不要）ため、
 	// /api/client-config 経由でクライアントへ配信する。
 	googleClientId: process.env.GOOGLE_OAUTH_CLIENT_ID ?? "",
-	editSpreadsheetId: process.env.EDIT_SPREADSHEET_ID ?? "",
+	editSpreadsheetId,
+	spreadsheetUrl,
 	votingSheetName: process.env.VOTING_SHEET_NAME ?? "投票",
 	votingLinkHeader: process.env.VOTING_LINK_HEADER ?? "Trackerへのリンク",
 	votingRunPkHeader: process.env.VOTING_RUNPK_HEADER ?? "runPk",

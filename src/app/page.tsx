@@ -4,6 +4,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
+import Snackbar from "@mui/material/Snackbar";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {CurrentGameBlock} from "@/components/CurrentGameBlock";
 import {ManualGamePicker} from "@/components/ManualGamePicker";
@@ -12,10 +13,12 @@ import {NextGameBlock} from "@/components/NextGameBlock";
 import {useAppState} from "@/components/Providers";
 import {
 	useBidProgress,
+	useClientConfig,
 	useGames,
 	usePointer,
 	useVoteOverrides,
 } from "@/lib/client/hooks";
+import {initSheetWrite, writeVoteClosedToSheet} from "@/lib/client/sheetWrite";
 import {
 	buildLookup,
 	computeTrio,
@@ -91,28 +94,38 @@ export default function Home() {
 	}, [trio]);
 	const {data: bidProgress} = useBidProgress(bidIds);
 
-	// 投票〆トグル（サーバー永続）。楽観更新してから POST する。
+	// 投票〆の書き戻し設定（GIS OAuth）。読み込めたら GIS を事前ロード。
+	const {data: clientConfig} = useClientConfig();
+	useEffect(() => {
+		if (clientConfig) initSheetWrite(clientConfig);
+	}, [clientConfig]);
+
+	// 投票〆トグル。ローカル即時反映（override 永続）＋スプレッドシートへ書き戻す。
 	const {data: voteOverrides, mutate: mutateOverrides} = useVoteOverrides();
+	const [syncMsg, setSyncMsg] = useState<string | null>(null);
 	const onToggleClose = useCallback(
 		(key: string, closed: boolean) => {
-			void mutateOverrides(
-				async () => {
-					const res = await fetch("/api/votes", {
-						method: "POST",
-						headers: {"Content-Type": "application/json"},
-						body: JSON.stringify({key, closed}),
-					});
-					if (!res.ok) throw new Error("toggle failed");
-					return res.json();
-				},
-				{
-					optimisticData: (cur) => ({...(cur ?? {}), [key]: closed}),
-					revalidate: false,
-					rollbackOnError: true,
-				},
-			);
+			// 1) ローカルに即時反映（表示用）＋サーバー永続。
+			void mutateOverrides((cur) => ({...(cur ?? {}), [key]: closed}), {
+				revalidate: false,
+			});
+			void fetch("/api/votes", {
+				method: "POST",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({key, closed}),
+			}).catch(() => {});
+			// 2) スプレッドシートの「投票〆た」セルだけを書き戻す（外部から確認可能に）。
+			if (clientConfig?.writeEnabled) {
+				writeVoteClosedToSheet(clientConfig, key, closed).catch((e: unknown) =>
+					setSyncMsg(
+						e instanceof Error
+							? `スプレッドシート書き戻し失敗: ${e.message}`
+							: "スプレッドシート書き戻しに失敗しました",
+					),
+				);
+			}
 		},
-		[mutateOverrides],
+		[mutateOverrides, clientConfig],
 	);
 
 	return (
@@ -191,6 +204,17 @@ export default function Home() {
 					onToggleClose={onToggleClose}
 				/>
 			</Box>
+
+			<Snackbar
+				open={!!syncMsg}
+				autoHideDuration={6000}
+				onClose={() => setSyncMsg(null)}
+				anchorOrigin={{vertical: "bottom", horizontal: "center"}}
+			>
+				<Alert severity='warning' onClose={() => setSyncMsg(null)}>
+					{syncMsg}
+				</Alert>
+			</Snackbar>
 		</Box>
 	);
 }

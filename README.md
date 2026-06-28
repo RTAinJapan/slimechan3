@@ -47,9 +47,24 @@ npm run dev                 # http://localhost:3000
 - 投票項目は 1 ゲームに複数ありうる。各項目は Tracker の bid に対応する。
 - 進捗（説明・目標金額・現在額・受付状態）は Tracker API から ~7 秒間隔で取得し、
   現在/次/次の次のゲームに表示する（開始前に〆ることがあるため次以降も表示）。
-- 「投票〆」チェックはスプレッドシートに書き戻せないため、アプリ側でトグルし
-  サーバーに永続化する（`VOTE_OVERRIDE_FILE`、Docker は `/app/data` ボリューム）。
-  シートの「投票〆た」を初期値とし、トグルが優先される。
+- 「投票〆」チェックは配信席以外からも確認できるよう、**スプレッドシートの
+  「投票〆た」セルへ書き戻す**。配信席 Chrome のログイン済み Google アカウント
+  （編集権限あり）を使い、ブラウザの OAuth(Google Identity Services) で該当
+  **1 セルのみ**を更新する（他セルには触れない）。
+- 表示の即時性のためローカルにも override を持つ（`VOTE_OVERRIDE_FILE`、Docker は
+  `/app/data`）。シートの「投票〆た」を初期値とし、トグルが優先される。
+
+#### 書き戻しのセットアップ
+
+1. Google Cloud で OAuth クライアント（種別: ウェブ アプリケーション）を作成し、
+   **承認済み JavaScript 生成元**にアプリの配信元（例: `http://localhost:3000`、
+   本番の配信 PC の URL）を登録する。client secret は使わない。
+2. `.env` に `GOOGLE_OAUTH_CLIENT_ID` と編集可能な `EDIT_SPREADSHEET_ID`
+   （公開 xlsx の URL とは別物）を設定する。設定しなければ書き戻しは無効。
+3. 配信席 Chrome を、対象スプレッドシートに編集権限を持つ Google アカウントで
+   ログインしておく（初回のみ同意ダイアログ、以降はサイレント取得）。
+4. 設定（client id / spreadsheet id 等）は `/api/client-config` からランタイムで
+   配信されるため、`.env` の変更だけで反映できる（再ビルド不要）。
 
 ## Docker での起動
 

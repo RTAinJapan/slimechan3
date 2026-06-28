@@ -18,4 +18,14 @@ export const env = {
 	voteOverrideFile:
 		process.env.VOTE_OVERRIDE_FILE ??
 		`${process.cwd()}/.data/vote-overrides.json`,
+
+	// 投票〆のスプレッドシート書き戻し（ブラウザの Google ログインを使うクライアント
+	// OAuth）。これらは秘密ではない（client secret は GIS トークンフローで不要）ため、
+	// /api/client-config 経由でクライアントへ配信する。
+	googleClientId: process.env.GOOGLE_OAUTH_CLIENT_ID ?? "",
+	editSpreadsheetId: process.env.EDIT_SPREADSHEET_ID ?? "",
+	votingSheetName: process.env.VOTING_SHEET_NAME ?? "投票",
+	votingLinkHeader: process.env.VOTING_LINK_HEADER ?? "Trackerへのリンク",
+	votingRunPkHeader: process.env.VOTING_RUNPK_HEADER ?? "runPk",
+	votingClosedHeader: process.env.VOTING_CLOSED_HEADER ?? "投票〆た",
 };

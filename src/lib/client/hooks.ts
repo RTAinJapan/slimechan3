@@ -3,6 +3,7 @@
 import useSWR from "swr";
 import type {BidProgress, GamesData, VoteOverrides} from "@/lib/domain/types";
 import type {Pointer} from "@/lib/nodecg/types";
+import type {SheetWriteConfig} from "@/lib/sheets/locate";
 
 const fetcher = async (url: string) => {
 	const res = await fetch(url);
@@ -38,5 +39,11 @@ export const useBidProgress = (ids: number[]) => {
 export const useVoteOverrides = () =>
 	useSWR<VoteOverrides>("/api/votes", fetcher, {
 		refreshInterval: 10_000,
+		revalidateOnFocus: false,
+	});
+
+// 投票〆のシート書き戻し設定（ランタイム配信）。
+export const useClientConfig = () =>
+	useSWR<SheetWriteConfig>("/api/client-config", fetcher, {
 		revalidateOnFocus: false,
 	});

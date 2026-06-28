@@ -90,7 +90,7 @@ const VotingItem = ({
 			)}
 
 			{options.length > 0 ? (
-				// 選択式投票: 各選択肢を金額の降順で表示。1 位（最高額）を強調する。
+				// 選択式投票: 各選択肢を金額の降順で表示。最高額は色と太字で強調する。
 				<Stack spacing={0.25} sx={{mt: 0.5, maxWidth: 320}}>
 					{options.map((o, i) => {
 						const isTop = topTotal > 0 && o.total === topTotal;
@@ -102,19 +102,9 @@ const VotingItem = ({
 								spacing={1}
 								sx={isTop ? {color: "primary.main"} : undefined}
 							>
-								<Stack direction='row' spacing={0.5} alignItems='center'>
-									{isTop && (
-										<Chip
-											size='small'
-											color='primary'
-											label='1位'
-											sx={{height: 18, "& .MuiChip-label": {px: 0.75}}}
-										/>
-									)}
-									<Typography variant='body2' fontWeight={isTop ? 700 : 400}>
-										{o.name}
-									</Typography>
-								</Stack>
+								<Typography variant='body2' fontWeight={isTop ? 700 : 400}>
+									{o.name}
+								</Typography>
 								<Typography variant='body2' fontWeight={isTop ? 700 : 600}>
 									{yen(o.total)}
 								</Typography>

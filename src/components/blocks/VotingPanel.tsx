@@ -1,13 +1,154 @@
 "use client";
 
+import Box from "@mui/material/Box";
+import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import LinearProgress from "@mui/material/LinearProgress";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import type {Voting} from "@/lib/domain/types";
+import type {BidProgress, VoteOverrides, Voting} from "@/lib/domain/types";
 
-export const VotingPanel = ({voting}: {voting?: Voting}) => {
-	if (!voting || (!voting.description && !voting.rta && !voting.trackerLink)) {
+const yen = (n?: number) =>
+	typeof n === "number" ? `¥${Math.round(n).toLocaleString()}` : "—";
+
+const STATE_LABEL: Record<
+	string,
+	{label: string; color: "success" | "default" | "warning"}
+> = {
+	OPENED: {label: "受付中", color: "success"},
+	CLOSED: {label: "締切", color: "default"},
+	HIDDEN: {label: "非表示", color: "warning"},
+};
+
+const VotingItem = ({
+	voting,
+	progress,
+	closed,
+	onToggleClose,
+}: {
+	voting: Voting;
+	progress?: BidProgress;
+	closed: boolean;
+	onToggleClose?: (key: string, closed: boolean) => void;
+}) => {
+	const description = progress?.description ?? voting.description;
+	const goal = progress?.goal ?? null;
+	const total = progress?.total;
+	const pct =
+		goal && goal > 0 && typeof total === "number"
+			? Math.min(100, (total / goal) * 100)
+			: null;
+	const state = progress?.state
+		? (STATE_LABEL[progress.state] ?? {
+				label: progress.state,
+				color: "default" as const,
+			})
+		: null;
+
+	return (
+		<Box sx={{borderLeft: 2, borderColor: "divider", pl: 1.5}}>
+			<Stack
+				direction='row'
+				spacing={1}
+				alignItems='center'
+				flexWrap='wrap'
+				useFlexGap
+			>
+				{state && (
+					<Chip
+						size='small'
+						label={`受付状態: ${state.label}`}
+						color={state.color}
+					/>
+				)}
+				{voting.isPublic !== undefined && (
+					<Chip
+						size='small'
+						variant='outlined'
+						label={voting.isPublic ? "公開" : "非公開"}
+					/>
+				)}
+				<FormControlLabel
+					sx={{ml: "auto", mr: 0}}
+					control={
+						<Checkbox
+							size='small'
+							checked={closed}
+							disabled={!onToggleClose}
+							onChange={(e) => onToggleClose?.(voting.key, e.target.checked)}
+						/>
+					}
+					label='投票〆'
+				/>
+			</Stack>
+
+			{description && (
+				<Typography variant='body2' sx={{whiteSpace: "pre-wrap"}}>
+					{description}
+				</Typography>
+			)}
+
+			{goal != null ? (
+				<Box sx={{mt: 0.5}}>
+					<Stack direction='row' justifyContent='space-between'>
+						<Typography variant='caption' color='text.secondary'>
+							{yen(total)} / {yen(goal)}
+						</Typography>
+						<Typography variant='caption' color='text.secondary'>
+							{pct != null ? `${Math.floor(pct)}%` : ""}
+							{progress?.count != null ? ` (${progress.count}件)` : ""}
+						</Typography>
+					</Stack>
+					<LinearProgress
+						variant='determinate'
+						value={pct ?? 0}
+						sx={{height: 6, borderRadius: 1}}
+					/>
+				</Box>
+			) : (
+				total != null && (
+					<Typography variant='caption' color='text.secondary'>
+						現在 {yen(total)}
+						{progress?.count != null ? ` (${progress.count}件)` : ""}
+					</Typography>
+				)
+			)}
+
+			{voting.closeTiming && (
+				<Typography variant='body2' color='text.secondary'>
+					〆タイミング: {voting.closeTiming}
+				</Typography>
+			)}
+			{voting.trackerLink && (
+				<Box>
+					<Link
+						href={voting.trackerLink}
+						target='_blank'
+						rel='noopener'
+						variant='caption'
+					>
+						Tracker を開く
+					</Link>
+				</Box>
+			)}
+		</Box>
+	);
+};
+
+export const VotingPanel = ({
+	votings,
+	progress,
+	overrides,
+	onToggleClose,
+}: {
+	votings: Voting[];
+	progress?: Record<number, BidProgress>;
+	overrides?: VoteOverrides;
+	onToggleClose?: (key: string, closed: boolean) => void;
+}) => {
+	if (!votings.length) {
 		return (
 			<Typography variant='body2' color='text.secondary'>
 				投票項目なし
@@ -15,38 +156,20 @@ export const VotingPanel = ({voting}: {voting?: Voting}) => {
 		);
 	}
 	return (
-		<Stack spacing={0.5}>
-			<Stack direction='row' spacing={1}>
-				{voting.isPublic !== undefined && (
-					<Chip
-						size='small'
-						label={voting.isPublic ? "公開" : "非公開"}
-						color={voting.isPublic ? "primary" : "default"}
+		<Stack spacing={1.5}>
+			{votings.map((v) => {
+				const closed = overrides?.[v.key] ?? v.closed ?? false;
+				const prog = v.bidId != null ? progress?.[v.bidId] : undefined;
+				return (
+					<VotingItem
+						key={v.key}
+						voting={v}
+						progress={prog}
+						closed={closed}
+						onToggleClose={onToggleClose}
 					/>
-				)}
-				{voting.closed !== undefined && (
-					<Chip
-						size='small'
-						label={voting.closed ? "〆済" : "受付中"}
-						color={voting.closed ? "default" : "success"}
-					/>
-				)}
-			</Stack>
-			{voting.description && (
-				<Typography variant='body2' sx={{whiteSpace: "pre-wrap"}}>
-					{voting.description}
-				</Typography>
-			)}
-			{voting.closeTiming && (
-				<Typography variant='body2' color='text.secondary'>
-					〆タイミング: {voting.closeTiming}
-				</Typography>
-			)}
-			{voting.trackerLink && (
-				<Link href={voting.trackerLink} target='_blank' rel='noopener'>
-					Tracker を開く
-				</Link>
-			)}
+				);
+			})}
 		</Stack>
 	);
 };

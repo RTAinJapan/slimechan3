@@ -30,14 +30,26 @@ npm run dev                 # http://localhost:3000
 
 主な環境変数（詳細は `.env.sample`）:
 
-| 変数                | 説明                                               |
-| ------------------- | -------------------------------------------------- |
-| `SCHEDULE_XLSX_URL` | 公開スプレッドシート(xlsx)の URL。**サーバー専用** |
-| `NODECG_URL`        | NodeCG の URL（既定 `http://localhost:9090`）      |
-| `NODECG_BUNDLE`     | NodeCG bundle 名（既定 `rtainjapan-layouts`）      |
-| `NODECG_TOKEN`      | NodeCG ログインセキュリティ有効時のみ              |
-| `XLSX_POLL_MS`      | xlsx 再取得間隔（ミリ秒、既定 60000）              |
-| `PORT`              | 待ち受けポート（既定 3000）                        |
+| 変数                 | 説明                                               |
+| -------------------- | -------------------------------------------------- |
+| `SCHEDULE_XLSX_URL`  | 公開スプレッドシート(xlsx)の URL。**サーバー専用** |
+| `NODECG_URL`         | NodeCG の URL（既定 `http://localhost:9090`）      |
+| `NODECG_BUNDLE`      | NodeCG bundle 名（既定 `rtainjapan-layouts`）      |
+| `NODECG_TOKEN`       | NodeCG ログインセキュリティ有効時のみ              |
+| `XLSX_POLL_MS`       | xlsx 再取得間隔（ミリ秒、既定 60000）              |
+| `TRACKER_API_BASE`   | 投票進捗を取得する Tracker のベース URL            |
+| `BID_CACHE_MS`       | bid 進捗のサーバー側キャッシュ（既定 7000）        |
+| `VOTE_OVERRIDE_FILE` | 投票〆トグルの永続ファイルパス                     |
+| `PORT`               | 待ち受けポート（既定 3000）                        |
+
+### 投票項目（投票）
+
+- 投票項目は 1 ゲームに複数ありうる。各項目は Tracker の bid に対応する。
+- 進捗（説明・目標金額・現在額・受付状態）は Tracker API から ~7 秒間隔で取得し、
+  現在/次/次の次のゲームに表示する（開始前に〆ることがあるため次以降も表示）。
+- 「投票〆」チェックはスプレッドシートに書き戻せないため、アプリ側でトグルし
+  サーバーに永続化する（`VOTE_OVERRIDE_FILE`、Docker は `/app/data` ボリューム）。
+  シートの「投票〆た」を初期値とし、トグルが優先される。
 
 ## Docker での起動
 

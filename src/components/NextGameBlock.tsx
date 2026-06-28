@@ -1,14 +1,28 @@
 "use client";
 
 import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import {CommentatorList} from "@/components/blocks/CommentatorList";
 import {RunnerList} from "@/components/blocks/RunnerList";
-import type {Game} from "@/lib/domain/types";
+import {VotingPanel} from "@/components/blocks/VotingPanel";
+import type {BidProgress, Game, VoteOverrides} from "@/lib/domain/types";
 
-export const NextGameBlock = ({label, game}: {label: string; game?: Game}) => {
+export const NextGameBlock = ({
+	label,
+	game,
+	bidProgress,
+	voteOverrides,
+	onToggleClose,
+}: {
+	label: string;
+	game?: Game;
+	bidProgress?: Record<number, BidProgress>;
+	voteOverrides?: VoteOverrides;
+	onToggleClose?: (key: string, closed: boolean) => void;
+}) => {
 	return (
 		<Paper variant='outlined' sx={{p: 2, height: "100%", overflow: "auto"}}>
 			<Typography variant='overline' color='text.secondary'>
@@ -44,6 +58,20 @@ export const NextGameBlock = ({label, game}: {label: string; game?: Game}) => {
 					<RunnerList runners={game.runners} />
 					{game.commentators.length > 0 && (
 						<CommentatorList commentators={game.commentators} />
+					)}
+					{game.votings.length > 0 && (
+						<>
+							<Divider />
+							<Typography variant='subtitle2' color='text.secondary'>
+								投票項目
+							</Typography>
+							<VotingPanel
+								votings={game.votings}
+								progress={bidProgress}
+								overrides={voteOverrides}
+								onToggleClose={onToggleClose}
+							/>
+						</>
 					)}
 				</Stack>
 			)}

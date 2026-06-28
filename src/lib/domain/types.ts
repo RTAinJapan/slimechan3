@@ -11,14 +11,31 @@ export type Commentator = Person & {
 	participationMethod?: string; // 参加方法（例: オフライン（会場での参加））
 };
 
+// 1 ゲームに複数の投票項目（bid）がありうる。1 件 = 1 bid。
 export type Voting = {
+	key: string; // 投票〆トグルの永続キー（bid:{id} または run:{pk}:{idx}）
+	bidId?: number; // Tracker の bid id（リンクから抽出）
 	rta?: string;
 	trackerLink?: string;
 	isPublic?: boolean; // 公開
-	closed?: boolean; // 投票〆た
+	closed?: boolean; // 投票〆た（シート上の初期値。アプリのトグルが優先）
 	description?: string; // 説明
 	closeTiming?: string; // 〆タイミング
 };
+
+// Tracker API (type=bid) から得る投票項目の進捗。
+export type BidProgress = {
+	bidId: number;
+	name?: string;
+	description?: string;
+	goal?: number | null; // 目標金額（選択式投票では null）
+	total?: number; // 現在の金額
+	state?: string; // 受付状態（OPENED / CLOSED / HIDDEN など）
+	count?: number; // 投票/寄付件数
+};
+
+// 投票〆トグルのアプリ側オーバーライド（key -> closed）。
+export type VoteOverrides = Record<string, boolean>;
 
 export type GameMemo = {
 	owner?: string; // 担当
@@ -47,7 +64,7 @@ export type Game = {
 	commentatorCount?: number;
 	runners: Runner[];
 	commentators: Commentator[];
-	voting?: Voting;
+	votings: Voting[];
 	memo?: GameMemo;
 	timerTiming?: TimerTiming;
 	isBackup?: boolean;

@@ -12,9 +12,13 @@ describe("joinGames", () => {
 		expect(backups.map((g) => g.pk)).toEqual([201]);
 	});
 
-	it("投票・メモ・タイマーを pk / 名前で join する", () => {
+	it("投票（複数）・メモ・タイマーを pk / 名前で join する", () => {
 		const a = byPk.get(101)!;
-		expect(a.voting?.description).toBe("どちらのルートを通りますか？");
+		expect(a.votings).toHaveLength(2);
+		expect(a.votings[0]).toMatchObject({
+			bidId: 1,
+			description: "どちらのルートを通りますか？",
+		});
 		expect(a.memo?.owner).toBe("セットアップ");
 		expect(a.timerTiming?.start).toBe("ニューゲームを選択した瞬間");
 	});

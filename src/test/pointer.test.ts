@@ -21,6 +21,7 @@ const mk = (
 	time,
 	runners: [],
 	commentators: [],
+	votings: [],
 });
 
 const games = [mk(101, 0, "A"), mk(102, 1, "B"), mk(103, 2, "C")];

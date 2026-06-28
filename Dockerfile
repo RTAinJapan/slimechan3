@@ -22,6 +22,10 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
+# 投票〆トグルの永続先（compose で volume をマウントする）。
+ENV VOTE_OVERRIDE_FILE=/app/data/vote-overrides.json
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+
 # standalone 出力（server.js と最小 node_modules）＋静的アセット＋public をコピー。
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

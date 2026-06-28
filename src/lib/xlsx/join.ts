@@ -55,7 +55,7 @@ export const joinGames = (
 			discordId: rn.discordId ?? runnerDiscord.get(rn.name),
 		})),
 		commentators: mergeCommentators(game.commentators, commentary.get(game.pk)),
-		voting: voting.get(game.pk),
+		votings: voting.get(game.pk) ?? [],
 		memo: memo.get(game.title),
 		timerTiming: timer.get(game.pk),
 	});

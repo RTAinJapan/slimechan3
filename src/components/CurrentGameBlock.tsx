@@ -11,7 +11,7 @@ import {GameMemoPanel} from "@/components/blocks/GameMemoPanel";
 import {RunnerList} from "@/components/blocks/RunnerList";
 import {TimerTimingPanel} from "@/components/blocks/TimerTimingPanel";
 import {VotingPanel} from "@/components/blocks/VotingPanel";
-import type {Game} from "@/lib/domain/types";
+import type {BidProgress, Game, VoteOverrides} from "@/lib/domain/types";
 
 const Section = ({
 	title,
@@ -31,9 +31,15 @@ const Section = ({
 export const CurrentGameBlock = ({
 	game,
 	warning,
+	bidProgress,
+	voteOverrides,
+	onToggleClose,
 }: {
 	game?: Game;
 	warning?: string;
+	bidProgress?: Record<number, BidProgress>;
+	voteOverrides?: VoteOverrides;
+	onToggleClose?: (key: string, closed: boolean) => void;
 }) => {
 	if (!game) {
 		return (
@@ -93,7 +99,12 @@ export const CurrentGameBlock = ({
 					<CommentatorList commentators={game.commentators} />
 				</Section>
 				<Section title='投票項目'>
-					<VotingPanel voting={game.voting} />
+					<VotingPanel
+						votings={game.votings}
+						progress={bidProgress}
+						overrides={voteOverrides}
+						onToggleClose={onToggleClose}
+					/>
 				</Section>
 				<Section title='ゲームごとのメモ'>
 					<GameMemoPanel memo={game.memo} />

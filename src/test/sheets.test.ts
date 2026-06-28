@@ -63,14 +63,22 @@ describe("parseBackupSheet", () => {
 });
 
 describe("parseVotingSheet", () => {
-	it("runPk でマップ化する", () => {
-		const voting = parseVotingSheet(raw[SHEET.voting] ?? []);
-		expect(voting.get(101)).toMatchObject({
+	const voting = parseVotingSheet(raw[SHEET.voting] ?? []);
+	it("1 ゲームの複数投票を配列で持つ", () => {
+		expect(voting.get(101)).toHaveLength(2);
+	});
+	it("bidId をリンクから抽出し key を付ける", () => {
+		expect(voting.get(101)![0]).toMatchObject({
+			bidId: 1,
+			key: "bid:1",
 			isPublic: true,
 			closed: false,
 			description: "どちらのルートを通りますか？",
 		});
-		expect(voting.get(103)?.closed).toBe(true);
+		expect(voting.get(101)![1]?.bidId).toBe(4);
+	});
+	it("投票〆た を真偽値に変換する", () => {
+		expect(voting.get(103)![0]?.closed).toBe(true);
 	});
 });
 

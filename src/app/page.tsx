@@ -4,13 +4,18 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
-import {useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {CurrentGameBlock} from "@/components/CurrentGameBlock";
 import {ManualGamePicker} from "@/components/ManualGamePicker";
 import {MenuBar} from "@/components/MenuBar";
 import {NextGameBlock} from "@/components/NextGameBlock";
 import {useAppState} from "@/components/Providers";
-import {useGames, usePointer} from "@/lib/client/hooks";
+import {
+	useBidProgress,
+	useGames,
+	usePointer,
+	useVoteOverrides,
+} from "@/lib/client/hooks";
 import {
 	buildLookup,
 	computeTrio,
@@ -74,6 +79,42 @@ export default function Home() {
 		? "このゲームは schedule に存在しません（バックアップの可能性）。"
 		: undefined;
 
+	// 今/次/次の次の投票項目の bid 進捗をまとめて取得する。
+	const bidIds = useMemo(() => {
+		const ids: number[] = [];
+		for (const g of [trio.current, trio.next, trio.nextNext]) {
+			g?.votings.forEach((v) => {
+				if (v.bidId != null) ids.push(v.bidId);
+			});
+		}
+		return ids;
+	}, [trio]);
+	const {data: bidProgress} = useBidProgress(bidIds);
+
+	// 投票〆トグル（サーバー永続）。楽観更新してから POST する。
+	const {data: voteOverrides, mutate: mutateOverrides} = useVoteOverrides();
+	const onToggleClose = useCallback(
+		(key: string, closed: boolean) => {
+			void mutateOverrides(
+				async () => {
+					const res = await fetch("/api/votes", {
+						method: "POST",
+						headers: {"Content-Type": "application/json"},
+						body: JSON.stringify({key, closed}),
+					});
+					if (!res.ok) throw new Error("toggle failed");
+					return res.json();
+				},
+				{
+					optimisticData: (cur) => ({...(cur ?? {}), [key]: closed}),
+					revalidate: false,
+					rollbackOnError: true,
+				},
+			);
+		},
+		[mutateOverrides],
+	);
+
 	return (
 		<Box sx={{height: "100vh", display: "flex", flexDirection: "column"}}>
 			<MenuBar online={online} />
@@ -127,10 +168,28 @@ export default function Home() {
 				}}
 			>
 				<Box sx={{gridRow: {md: "1 / span 2"}, minHeight: 0}}>
-					<CurrentGameBlock game={trio.current} warning={warning} />
+					<CurrentGameBlock
+						game={trio.current}
+						warning={warning}
+						bidProgress={bidProgress}
+						voteOverrides={voteOverrides}
+						onToggleClose={onToggleClose}
+					/>
 				</Box>
-				<NextGameBlock label='次のゲーム' game={trio.next} />
-				<NextGameBlock label='次の次のゲーム' game={trio.nextNext} />
+				<NextGameBlock
+					label='次のゲーム'
+					game={trio.next}
+					bidProgress={bidProgress}
+					voteOverrides={voteOverrides}
+					onToggleClose={onToggleClose}
+				/>
+				<NextGameBlock
+					label='次の次のゲーム'
+					game={trio.nextNext}
+					bidProgress={bidProgress}
+					voteOverrides={voteOverrides}
+					onToggleClose={onToggleClose}
+				/>
 			</Box>
 		</Box>
 	);

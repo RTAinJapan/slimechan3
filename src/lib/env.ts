@@ -11,4 +11,11 @@ export const env = {
 	nodecgBundle: process.env.NODECG_BUNDLE ?? "rtainjapan-layouts",
 	nodecgToken: process.env.NODECG_TOKEN || undefined,
 	xlsxPollMs: num(process.env.XLSX_POLL_MS, 60000),
+	trackerApiBase: (
+		process.env.TRACKER_API_BASE ?? "https://tracker.rtain.jp"
+	).replace(/\/$/, ""),
+	bidCacheMs: num(process.env.BID_CACHE_MS, 7000),
+	voteOverrideFile:
+		process.env.VOTE_OVERRIDE_FILE ??
+		`${process.cwd()}/.data/vote-overrides.json`,
 };

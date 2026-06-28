@@ -166,6 +166,16 @@ const voting = [
 	],
 	[
 		"2025-08-09",
+		"101.0",
+		"Alpha Quest",
+		"https://example.invalid/bid/4",
+		"True",
+		"False",
+		"2 つ目の投票項目",
+		"",
+	],
+	[
+		"2025-08-09",
 		"103.0",
 		"Gamma Gear",
 		"https://example.invalid/bid/3",

@@ -11,4 +11,10 @@ services:
     # Linux でも host-gateway により解決可能。
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    # 投票〆トグルの状態を再起動後も保持する。
+    volumes:
+      - slimechan3-data:/app/data
     restart: unless-stopped
+
+volumes:
+  slimechan3-data:

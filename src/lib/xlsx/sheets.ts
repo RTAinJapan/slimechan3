@@ -146,6 +146,7 @@ export const parseScheduleSheet = (rows: RawRow[]): Game[] => {
 			commentatorCount: toNum(row[10]),
 			runners,
 			commentators,
+			votings: [],
 		});
 	}
 	return games;
@@ -189,29 +190,44 @@ export const parseBackupSheet = (rows: RawRow[]): Game[] => {
 			layout: str(row[7]),
 			runners,
 			commentators: [],
+			votings: [],
 			isBackup: true,
 		});
 	}
 	return games;
 };
 
-// --- 投票 ---
-export const parseVotingSheet = (rows: RawRow[]): Map<number, Voting> => {
-	const out = new Map<number, Voting>();
+// --- 投票（1 ゲームに複数 bid がありうるので配列で持つ）---
+const bidIdFromLink = (link: string | undefined): number | undefined => {
+	if (!link) return undefined;
+	const m = link.match(/\/bid\/(\d+)/);
+	return m ? Number(m[1]) : undefined;
+};
+
+export const parseVotingSheet = (rows: RawRow[]): Map<number, Voting[]> => {
+	const out = new Map<number, Voting[]>();
 	if (rows.length < 2) return out;
 	const map = headerMap(rows);
 	for (let r = 1; r < rows.length; r++) {
 		const row = rows[r] ?? [];
 		const pk = toNum(cell(row, map, "runPk"));
 		if (pk === undefined) continue;
-		out.set(pk, {
+		const trackerLink = cell(row, map, "Trackerへのリンク");
+		const bidId = bidIdFromLink(trackerLink);
+		const list = out.get(pk) ?? [];
+		const key =
+			bidId !== undefined ? `bid:${bidId}` : `run:${pk}:${list.length}`;
+		list.push({
+			key,
+			bidId,
 			rta: cell(row, map, "RTA"),
-			trackerLink: cell(row, map, "Trackerへのリンク"),
+			trackerLink,
 			isPublic: toBool(cell(row, map, "公開")),
 			closed: toBool(cell(row, map, "投票〆た")),
 			description: cell(row, map, "説明"),
 			closeTiming: cell(row, map, "〆タイミング"),
 		});
+		out.set(pk, list);
 	}
 	return out;
 };

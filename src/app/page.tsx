@@ -14,8 +14,8 @@ import {useCallback, useEffect, useMemo, useState} from "react";
 import {CurrentGameBlock} from "@/components/CurrentGameBlock";
 import {ManualGamePicker} from "@/components/ManualGamePicker";
 import {MenuBar} from "@/components/MenuBar";
+import {EventsBlock} from "@/components/EventsBlock";
 import {NextGameBlock} from "@/components/NextGameBlock";
-import {UpcomingEvents} from "@/components/UpcomingEvents";
 import {useAppState} from "@/components/Providers";
 import {
 	useBidProgress,
@@ -106,22 +106,10 @@ export default function Home() {
 	const prevDisabled = !list.length || currentIndex === 0;
 	const nextDisabled = !list.length || currentIndex === list.length - 1;
 
-	// ゲーム外の進行を独立要素として表示する（見落とし防止）。
-	const eventGroups = useMemo(
-		() => [
-			{
-				label: trio.current
-					? "このあと（次のゲームまで）"
-					: "最初のゲームまでの進行（開始前）",
-				events: trio.next?.precedingEvents ?? [],
-			},
-			{
-				label: "次の次のゲームまで",
-				events: trio.nextNext?.precedingEvents ?? [],
-			},
-		],
-		[trio],
-	);
+	// ゲーム外の進行を、実施タイミングに対応する位置へ独立ブロックで表示する。
+	const eventsBeforeCurrent = trio.current?.precedingEvents ?? []; // 現在の前
+	const eventsAfterCurrent = trio.next?.precedingEvents ?? []; // 現在の直後（次の前）
+	const eventsAfterNext = trio.nextNext?.precedingEvents ?? []; // 次の後（次の次の前）
 
 	// 今/次/次の次の投票項目の bid 進捗をまとめて取得する。
 	const bidIds = useMemo(() => {
@@ -234,42 +222,69 @@ export default function Home() {
 
 			{isLoading && <LinearProgress />}
 
-			<UpcomingEvents groups={eventGroups} />
-
 			<Box
 				sx={{
 					flexGrow: 1,
 					minHeight: 0,
-					display: "grid",
+					display: "flex",
+					flexDirection: {xs: "column", md: "row"},
 					gap: 2,
 					p: 2,
-					gridTemplateColumns: {xs: "1fr", md: "3fr 2fr"},
-					gridTemplateRows: {xs: "auto", md: "1fr 1fr"},
 				}}
 			>
-				<Box sx={{gridRow: {md: "1 / span 2"}, minHeight: 0}}>
-					<CurrentGameBlock
-						game={trio.current}
-						warning={warning}
-						bidProgress={bidProgress}
-						voteOverrides={voteOverrides}
-						onToggleClose={onToggleClose}
-					/>
+				{/* 左カラム: 現在の前の進行 → 現在のゲーム → 現在の直後の進行 */}
+				<Box
+					sx={{
+						flex: {md: "3 1 0"},
+						minHeight: 0,
+						display: "flex",
+						flexDirection: "column",
+						gap: 1,
+					}}
+				>
+					<EventsBlock events={eventsBeforeCurrent} />
+					<Box sx={{flexGrow: 1, minHeight: 0}}>
+						<CurrentGameBlock
+							game={trio.current}
+							warning={warning}
+							bidProgress={bidProgress}
+							voteOverrides={voteOverrides}
+							onToggleClose={onToggleClose}
+						/>
+					</Box>
+					<EventsBlock events={eventsAfterCurrent} />
 				</Box>
-				<NextGameBlock
-					label='次のゲーム'
-					game={trio.next}
-					bidProgress={bidProgress}
-					voteOverrides={voteOverrides}
-					onToggleClose={onToggleClose}
-				/>
-				<NextGameBlock
-					label='次の次のゲーム'
-					game={trio.nextNext}
-					bidProgress={bidProgress}
-					voteOverrides={voteOverrides}
-					onToggleClose={onToggleClose}
-				/>
+
+				{/* 右カラム: 次のゲーム → 次の後の進行 → 次の次のゲーム */}
+				<Box
+					sx={{
+						flex: {md: "2 1 0"},
+						minHeight: 0,
+						display: "flex",
+						flexDirection: "column",
+						gap: 1,
+					}}
+				>
+					<Box sx={{flexGrow: 1, minHeight: 0}}>
+						<NextGameBlock
+							label='次のゲーム'
+							game={trio.next}
+							bidProgress={bidProgress}
+							voteOverrides={voteOverrides}
+							onToggleClose={onToggleClose}
+						/>
+					</Box>
+					<EventsBlock events={eventsAfterNext} />
+					<Box sx={{flexGrow: 1, minHeight: 0}}>
+						<NextGameBlock
+							label='次の次のゲーム'
+							game={trio.nextNext}
+							bidProgress={bidProgress}
+							voteOverrides={voteOverrides}
+							onToggleClose={onToggleClose}
+						/>
+					</Box>
+				</Box>
 			</Box>
 
 			<Snackbar

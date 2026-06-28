@@ -104,8 +104,18 @@ const VotingItem = ({
 					))}
 				</Stack>
 			) : goal != null ? (
-				// 目標額型: 達成バーは出さず金額のみ表示する。
+				// 目標額型: バーは出さず、達成率(%)と金額を表示する。
 				<Typography variant='body2' color='text.secondary'>
+					{goal > 0 && typeof total === "number" && (
+						<Typography
+							component='span'
+							fontWeight={700}
+							color='text.primary'
+							sx={{mr: 1}}
+						>
+							達成率 {Math.floor((total / goal) * 100)}%
+						</Typography>
+					)}
 					現在 {yen(total)} / 目標 {yen(goal)}
 					{progress?.count != null ? `（${progress.count}件）` : ""}
 				</Typography>

@@ -1,5 +1,6 @@
 "use client";
 
+import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
@@ -55,9 +56,19 @@ export const NextGameBlock = ({
 							/>
 						)}
 					</Stack>
-					<RunnerList runners={game.runners} />
+					<Box>
+						<Typography variant='caption' color='text.secondary'>
+							走者
+						</Typography>
+						<RunnerList runners={game.runners} />
+					</Box>
 					{game.commentators.length > 0 && (
-						<CommentatorList commentators={game.commentators} />
+						<Box>
+							<Typography variant='caption' color='text.secondary'>
+								解説
+							</Typography>
+							<CommentatorList commentators={game.commentators} />
+						</Box>
 					)}
 					{game.votings.length > 0 && (
 						<>

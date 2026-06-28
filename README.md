@@ -24,11 +24,11 @@ RTA in Japan の配信席で、**今のゲーム / 次のゲーム / 次の次�
 
 ```bash
 npm ci
-cp .env.example .env.local   # SCHEDULE_XLSX_URL などを設定
-npm run dev                  # http://localhost:3000
+cp .env.sample .env.local   # SCHEDULE_XLSX_URL などを設定（ローカル開発は NODECG_URL を localhost に）
+npm run dev                 # http://localhost:3000
 ```
 
-主な環境変数（詳細は `.env.example`）:
+主な環境変数（詳細は `.env.sample`）:
 
 | 変数                | 説明                                               |
 | ------------------- | -------------------------------------------------- |
@@ -37,6 +37,22 @@ npm run dev                  # http://localhost:3000
 | `NODECG_BUNDLE`     | NodeCG bundle 名（既定 `rtainjapan-layouts`）      |
 | `NODECG_TOKEN`      | NodeCG ログインセキュリティ有効時のみ              |
 | `XLSX_POLL_MS`      | xlsx 再取得間隔（ミリ秒、既定 60000）              |
+| `PORT`              | 待ち受けポート（既定 3000）                        |
+
+## Docker での起動
+
+```bash
+cp .env.sample .env   # 値を設定（.env はコミットしない）
+docker compose up -d  # http://localhost:3000
+```
+
+- 環境変数は `.env` から読み込まれる（`env_file`）。`.env` はコミットせず、
+  テンプレートとして `.env.sample` をコミットしている。
+- 同 PC（ホスト）で動く NodeCG へは `host.docker.internal` で到達する
+  （`.env` の `NODECG_URL=http://host.docker.internal:9090`）。compose は
+  `host-gateway` を設定済みなので Linux でも解決できる。
+- イメージは Next.js の `output: "standalone"` をマルチステージビルドした
+  最小構成。
 
 ## スクリプト
 

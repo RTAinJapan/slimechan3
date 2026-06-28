@@ -30,6 +30,8 @@ describe("parseScheduleSheet", () => {
 		expect(a.est).toBe("0:30:00");
 		expect(a.hasVoting).toBe(true);
 		expect(a.scheduleOrder).toBe(0);
+		expect(a.date).toBe("2025/08/09"); // 直前の日付区切り行が紐付く
+		expect(a.time).toBe("10:05");
 	});
 
 	it("runner と解説を動的列から解析する", () => {

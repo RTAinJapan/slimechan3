@@ -70,6 +70,9 @@ const cell = (
 	return i === undefined ? undefined : str(row[i]);
 };
 
+// 日付区切り行の判定（例: 2025/08/09, 2025-8-9）。
+const DATE_RE = /^\d{4}[/-]\d{1,2}[/-]\d{1,2}/;
+
 // 「... - {pk}」末尾から pk を取り出す（解説生の担当ゲームカテゴリ等）。
 const pkFromCategory = (v: string | null | undefined): number | undefined => {
 	const t = str(v);
@@ -96,10 +99,16 @@ export const parseScheduleSheet = (rows: RawRow[]): Game[] => {
 
 	const games: Game[] = [];
 	let order = 0;
+	let currentDate: string | undefined;
 	for (let r = 2; r < rows.length; r++) {
 		const row = rows[r] ?? [];
 		const pk = toNum(row[3]); // pkId
-		if (pk === undefined) continue; // 日付区切り行・非ゲーム行
+		if (pk === undefined) {
+			// 日付区切り行（先頭セルが日付）なら以降のゲームの日付として記憶する。
+			const c0 = str(row[0]);
+			if (c0 && DATE_RE.test(c0)) currentDate = c0;
+			continue; // 日付区切り行・非ゲーム行
+		}
 		const title = str(row[1]);
 		if (!title) continue;
 
@@ -124,6 +133,7 @@ export const parseScheduleSheet = (rows: RawRow[]): Game[] => {
 		games.push({
 			pk,
 			scheduleOrder: order++,
+			date: currentDate,
 			time: str(row[0]),
 			title,
 			category: str(row[2]),

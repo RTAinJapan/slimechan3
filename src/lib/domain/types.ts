@@ -34,6 +34,7 @@ export type TimerTiming = {
 export type Game = {
 	pk: number; // join キー（schedule.pkId）
 	scheduleOrder: number; // ゲーム行の並び順（行番号ではない）
+	date?: string; // 直近の日付区切り行（例: 2025/08/09）。時刻推定に使う
 	time?: string;
 	title: string;
 	category?: string;

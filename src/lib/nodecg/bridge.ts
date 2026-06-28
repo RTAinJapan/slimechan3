@@ -60,8 +60,15 @@ const refresh = () => {
 
 const ensure = () => {
 	if (socket) return;
+	// NodeCG は単独で再起動しうる。起動順に依存せず、未接続でも一定間隔で
+	// 自動再接続し続ける（初回接続失敗も socket.io が再試行する）。
 	const s = io(env.nodecgUrl, {
 		reconnection: true,
+		reconnectionAttempts: Infinity,
+		reconnectionDelay: 1000,
+		reconnectionDelayMax: 10000,
+		randomizationFactor: 0.5,
+		timeout: 5000,
 		query: env.nodecgToken ? {token: env.nodecgToken} : undefined,
 	});
 	socket = s;

@@ -64,17 +64,17 @@ describe("computeTrio", () => {
 });
 
 describe("parseScheduleDateTime", () => {
-	it("日付＋時刻をローカル Date にする", () => {
-		const d = parseScheduleDateTime("2025/08/09", "14:40");
-		expect(d).not.toBeNull();
-		expect(d!.getFullYear()).toBe(2025);
-		expect(d!.getMonth()).toBe(7); // 0-based
-		expect(d!.getDate()).toBe(9);
-		expect(d!.getHours()).toBe(14);
-		expect(d!.getMinutes()).toBe(40);
+	it("時刻を JST の絶対時刻として解釈する（実行環境の TZ に依存しない）", () => {
+		// 14:40 JST = 05:40 UTC
+		expect(parseScheduleDateTime("2025/08/09", "14:40")?.toISOString()).toBe(
+			"2025-08-09T05:40:00.000Z",
+		);
 	});
-	it("ハイフン区切りも解釈する", () => {
-		expect(parseScheduleDateTime("2025-8-9", "9:05")).not.toBeNull();
+	it("ハイフン区切りも JST として解釈する", () => {
+		// 9:05 JST = 00:05 UTC
+		expect(parseScheduleDateTime("2025-8-9", "9:05")?.toISOString()).toBe(
+			"2025-08-09T00:05:00.000Z",
+		);
 	});
 	it("欠損は null", () => {
 		expect(parseScheduleDateTime(undefined, "14:40")).toBeNull();
@@ -88,19 +88,24 @@ describe("estimateCurrentPk", () => {
 		mk(2, 1, "B", "2025/08/09", "11:00"),
 		mk(3, 2, "C", "2025/08/09", "12:00"),
 	];
+	// now は JST 明示の絶対時刻で与える（runner の TZ に依存しないため）。
+	const jst = (iso: string) => new Date(iso);
 
 	it("now 以前で最も遅い開始のゲームを現在とする", () => {
-		const now = new Date(2025, 7, 9, 11, 30);
-		expect(estimateCurrentPk(timed, now)).toBe(2);
+		expect(estimateCurrentPk(timed, jst("2025-08-09T11:30:00+09:00"))).toBe(2);
 	});
 	it("最終ゲーム以降は最終ゲーム", () => {
-		expect(estimateCurrentPk(timed, new Date(2025, 7, 9, 23, 0))).toBe(3);
+		expect(estimateCurrentPk(timed, jst("2025-08-09T23:00:00+09:00"))).toBe(3);
 	});
 	it("イベント開始前は null", () => {
-		expect(estimateCurrentPk(timed, new Date(2025, 7, 9, 9, 0))).toBeNull();
+		expect(
+			estimateCurrentPk(timed, jst("2025-08-09T09:00:00+09:00")),
+		).toBeNull();
 	});
 	it("時刻が無いゲームは無視する", () => {
 		const noTime = [mk(9, 0, "NoTime")];
-		expect(estimateCurrentPk(noTime, new Date(2025, 7, 9, 12, 0))).toBeNull();
+		expect(
+			estimateCurrentPk(noTime, jst("2025-08-09T12:00:00+09:00")),
+		).toBeNull();
 	});
 });

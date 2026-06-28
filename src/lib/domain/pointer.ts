@@ -44,8 +44,12 @@ export const buildLookup = (...lists: Game[][]): Map<number, Game> => {
 	return map;
 };
 
-// schedule の日付文字列（2025/08/09 等）＋時刻（14:40 等）をローカル時刻の Date にする。
-// 配信 PC と会場は同一タイムゾーン前提のため、ローカル時刻で構築する。
+// イベントのタイムゾーンは日本（JST = UTC+9、サマータイム無し）に固定する。
+// 実行環境（ブラウザ/サーバー）の TZ に依存せず、schedule の時刻を JST として解釈する。
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+// schedule の日付文字列（2025/08/09 等）＋時刻（14:40 等）を、
+// JST の実時刻として表す Date（絶対時刻）に変換する。
 export const parseScheduleDateTime = (
 	date: string | undefined,
 	time: string | undefined,
@@ -54,15 +58,15 @@ export const parseScheduleDateTime = (
 	const d = date.match(/(\d{4})[/-](\d{1,2})[/-](\d{1,2})/);
 	const t = time.match(/(\d{1,2}):(\d{2})/);
 	if (!d || !t) return null;
-	return new Date(
+	// その壁時計時刻を JST とみなした絶対時刻（UTC 換算 − 9h）。
+	const utcMs = Date.UTC(
 		Number(d[1]),
 		Number(d[2]) - 1,
 		Number(d[3]),
 		Number(t[1]),
 		Number(t[2]),
-		0,
-		0,
 	);
+	return new Date(utcMs - JST_OFFSET_MS);
 };
 
 // NodeCG 未接続時、schedule の時刻から「今 now の時点で進行中のゲーム」を推定する。

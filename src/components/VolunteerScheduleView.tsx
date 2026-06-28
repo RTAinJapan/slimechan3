@@ -19,7 +19,11 @@ export const VolunteerScheduleView = ({table}: {table: VolunteerTable}) => {
 		);
 	}
 	return (
-		<TableContainer component={Paper} variant='outlined'>
+		<TableContainer
+			component={Paper}
+			variant='outlined'
+			sx={{flexGrow: 1, minHeight: 0, overflow: "auto"}}
+		>
 			<Table size='small' stickyHeader>
 				<TableHead>
 					<TableRow>

@@ -1,5 +1,6 @@
 "use client";
 
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -45,46 +46,57 @@ export const GameListView = ({
 			</TableRow>
 		));
 
+	const headerRow = (
+		<TableRow>
+			<TableCell>時刻</TableCell>
+			<TableCell>ゲーム</TableCell>
+			<TableCell>カテゴリ</TableCell>
+			<TableCell>機種</TableCell>
+			<TableCell>走者</TableCell>
+			<TableCell align='right'>操作</TableCell>
+		</TableRow>
+	);
+
 	return (
-		<>
-			<TableContainer component={Paper} variant='outlined' sx={{mb: 3}}>
+		<Box
+			sx={{
+				flexGrow: 1,
+				minHeight: 0,
+				display: "flex",
+				flexDirection: "column",
+				gap: 1,
+			}}
+		>
+			<TableContainer
+				component={Paper}
+				variant='outlined'
+				sx={{
+					flex: backups.length ? "2 1 0" : "1 1 0",
+					minHeight: 0,
+					overflow: "auto",
+				}}
+			>
 				<Table size='small' stickyHeader>
-					<TableHead>
-						<TableRow>
-							<TableCell>時刻</TableCell>
-							<TableCell>ゲーム</TableCell>
-							<TableCell>カテゴリ</TableCell>
-							<TableCell>機種</TableCell>
-							<TableCell>走者</TableCell>
-							<TableCell align='right'>操作</TableCell>
-						</TableRow>
-					</TableHead>
+					<TableHead>{headerRow}</TableHead>
 					<TableBody>{renderRows(games)}</TableBody>
 				</Table>
 			</TableContainer>
 
 			{backups.length > 0 && (
 				<>
-					<Typography variant='h6' gutterBottom>
-						バックアップ
-					</Typography>
-					<TableContainer component={Paper} variant='outlined'>
-						<Table size='small'>
-							<TableHead>
-								<TableRow>
-									<TableCell>時刻</TableCell>
-									<TableCell>ゲーム</TableCell>
-									<TableCell>カテゴリ</TableCell>
-									<TableCell>機種</TableCell>
-									<TableCell>走者</TableCell>
-									<TableCell align='right'>操作</TableCell>
-								</TableRow>
-							</TableHead>
+					<Typography variant='h6'>バックアップ</Typography>
+					<TableContainer
+						component={Paper}
+						variant='outlined'
+						sx={{flex: "1 1 0", minHeight: 0, overflow: "auto"}}
+					>
+						<Table size='small' stickyHeader>
+							<TableHead>{headerRow}</TableHead>
 							<TableBody>{renderRows(backups)}</TableBody>
 						</Table>
 					</TableContainer>
 				</>
 			)}
-		</>
+		</Box>
 	);
 };

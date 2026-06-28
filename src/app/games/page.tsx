@@ -12,9 +12,17 @@ export default function GamesPage() {
 	const {data, error, isLoading} = useGames();
 
 	return (
-		<Box sx={{minHeight: "100vh", display: "flex", flexDirection: "column"}}>
+		<Box sx={{height: "100vh", display: "flex", flexDirection: "column"}}>
 			<MenuBar />
-			<Box sx={{p: 2}}>
+			<Box
+				sx={{
+					p: 2,
+					flexGrow: 1,
+					minHeight: 0,
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
 				<Typography variant='h5' gutterBottom>
 					ゲーム一覧
 				</Typography>

@@ -36,6 +36,9 @@ const VotingItem = ({
 	const goal = progress?.goal ?? null;
 	const total = progress?.total;
 	const options = progress?.options ?? [];
+	const topTotal = options.length
+		? Math.max(...options.map((o) => o.total))
+		: 0;
 	const state = progress?.state
 		? (STATE_LABEL[progress.state] ?? {
 				label: progress.state,
@@ -87,21 +90,37 @@ const VotingItem = ({
 			)}
 
 			{options.length > 0 ? (
-				// 選択式投票: 各選択肢を金額の降順で表示する。
-				<Stack spacing={0.25} sx={{mt: 0.5}}>
-					{options.map((o, i) => (
-						<Stack
-							key={i}
-							direction='row'
-							justifyContent='space-between'
-							spacing={1}
-						>
-							<Typography variant='body2'>{o.name}</Typography>
-							<Typography variant='body2' fontWeight={600}>
-								{yen(o.total)}
-							</Typography>
-						</Stack>
-					))}
+				// 選択式投票: 各選択肢を金額の降順で表示。1 位（最高額）を強調する。
+				<Stack spacing={0.25} sx={{mt: 0.5, maxWidth: 320}}>
+					{options.map((o, i) => {
+						const isTop = topTotal > 0 && o.total === topTotal;
+						return (
+							<Stack
+								key={i}
+								direction='row'
+								justifyContent='space-between'
+								spacing={1}
+								sx={isTop ? {color: "primary.main"} : undefined}
+							>
+								<Stack direction='row' spacing={0.5} alignItems='center'>
+									{isTop && (
+										<Chip
+											size='small'
+											color='primary'
+											label='1位'
+											sx={{height: 18, "& .MuiChip-label": {px: 0.75}}}
+										/>
+									)}
+									<Typography variant='body2' fontWeight={isTop ? 700 : 400}>
+										{o.name}
+									</Typography>
+								</Stack>
+								<Typography variant='body2' fontWeight={isTop ? 700 : 600}>
+									{yen(o.total)}
+								</Typography>
+							</Stack>
+						);
+					})}
 				</Stack>
 			) : goal != null ? (
 				// 目標額型: バーは出さず、達成率(%)と金額を表示する。

@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import LinearProgress from "@mui/material/LinearProgress";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -36,10 +35,7 @@ const VotingItem = ({
 	const description = progress?.description ?? voting.description;
 	const goal = progress?.goal ?? null;
 	const total = progress?.total;
-	const pct =
-		goal && goal > 0 && typeof total === "number"
-			? Math.min(100, (total / goal) * 100)
-			: null;
+	const options = progress?.options ?? [];
 	const state = progress?.state
 		? (STATE_LABEL[progress.state] ?? {
 				label: progress.state,
@@ -90,28 +86,34 @@ const VotingItem = ({
 				</Typography>
 			)}
 
-			{goal != null ? (
-				<Box sx={{mt: 0.5}}>
-					<Stack direction='row' justifyContent='space-between'>
-						<Typography variant='caption' color='text.secondary'>
-							{yen(total)} / {yen(goal)}
-						</Typography>
-						<Typography variant='caption' color='text.secondary'>
-							{pct != null ? `${Math.floor(pct)}%` : ""}
-							{progress?.count != null ? ` (${progress.count}件)` : ""}
-						</Typography>
-					</Stack>
-					<LinearProgress
-						variant='determinate'
-						value={pct ?? 0}
-						sx={{height: 6, borderRadius: 1}}
-					/>
-				</Box>
+			{options.length > 0 ? (
+				// 選択式投票: 各選択肢を金額の降順で表示する。
+				<Stack spacing={0.25} sx={{mt: 0.5}}>
+					{options.map((o, i) => (
+						<Stack
+							key={i}
+							direction='row'
+							justifyContent='space-between'
+							spacing={1}
+						>
+							<Typography variant='body2'>{o.name}</Typography>
+							<Typography variant='body2' fontWeight={600}>
+								{yen(o.total)}
+							</Typography>
+						</Stack>
+					))}
+				</Stack>
+			) : goal != null ? (
+				// 目標額型: 達成バーは出さず金額のみ表示する。
+				<Typography variant='body2' color='text.secondary'>
+					現在 {yen(total)} / 目標 {yen(goal)}
+					{progress?.count != null ? `（${progress.count}件）` : ""}
+				</Typography>
 			) : (
 				total != null && (
-					<Typography variant='caption' color='text.secondary'>
+					<Typography variant='body2' color='text.secondary'>
 						現在 {yen(total)}
-						{progress?.count != null ? ` (${progress.count}件)` : ""}
+						{progress?.count != null ? `（${progress.count}件）` : ""}
 					</Typography>
 				)
 			)}

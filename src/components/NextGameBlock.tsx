@@ -7,6 +7,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import {CommentatorList} from "@/components/blocks/CommentatorList";
+import {GameMemoPanel} from "@/components/blocks/GameMemoPanel";
 import {RunnerList} from "@/components/blocks/RunnerList";
 import {VotingPanel} from "@/components/blocks/VotingPanel";
 import type {BidProgress, Game, VoteOverrides} from "@/lib/domain/types";
@@ -68,6 +69,14 @@ export const NextGameBlock = ({
 								解説
 							</Typography>
 							<CommentatorList commentators={game.commentators} />
+						</Box>
+					)}
+					{(game.memo?.owner || game.memo?.content) && (
+						<Box>
+							<Typography variant='caption' color='text.secondary'>
+								ゲームごとのメモ
+							</Typography>
+							<GameMemoPanel memo={game.memo} />
 						</Box>
 					)}
 					{game.votings.length > 0 && (

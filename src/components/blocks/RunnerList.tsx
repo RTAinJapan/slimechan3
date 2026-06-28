@@ -1,7 +1,6 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type {Runner} from "@/lib/domain/types";
 
@@ -13,8 +12,16 @@ export const RunnerList = ({runners}: {runners: Runner[]}) => {
 			</Typography>
 		);
 	}
+	// 横幅が余る場合は 2 人程度を横に並べる（長い名前でも崩れないよう最小幅を確保）。
 	return (
-		<Stack spacing={0.5}>
+		<Box
+			sx={{
+				display: "grid",
+				gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+				columnGap: 2,
+				rowGap: 0.5,
+			}}
+		>
 			{runners.map((r, i) => (
 				<Box key={`${r.name}-${i}`}>
 					<Typography component='span' fontWeight={600}>
@@ -32,6 +39,6 @@ export const RunnerList = ({runners}: {runners: Runner[]}) => {
 					)}
 				</Box>
 			))}
-		</Stack>
+		</Box>
 	);
 };

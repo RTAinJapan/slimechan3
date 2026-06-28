@@ -32,6 +32,9 @@ export type BidProgress = {
 	total?: number; // 現在の金額
 	state?: string; // 受付状態（OPENED / CLOSED / HIDDEN など）
 	count?: number; // 投票/寄付件数
+	isChoice?: boolean; // 選択式投票（bidwar）か
+	// 選択式投票の各選択肢（金額の降順）。
+	options?: {name: string; total: number}[];
 };
 
 // 投票〆トグルのアプリ側オーバーライド（key -> closed）。

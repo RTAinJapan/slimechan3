@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: "npm"
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      # standalone 出力を「展開してそのまま実行できる」ディレクトリ構成に組み立てる。
+      # (.next/static と public は standalone 配下に配置しないと配信されない)
+      - name: Assemble runnable standalone bundle
+        run: |
+          mkdir -p dist
+          cp -r .next/standalone/. dist/
+          mkdir -p dist/.next
+          cp -r .next/static dist/.next/static
+          cp -r public dist/public
+          cp .env.sample dist/.env.sample
+          cp deploy/START.md deploy/start.sh deploy/start.cmd dist/
+      - name: Upload standalone bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: slimechan3-standalone
+          path: dist
+          # .next / .env.sample などドット始まりを含めるために必須
+          include-hidden-files: true
+          if-no-files-found: error

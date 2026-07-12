@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 投票〆トグルの永続データ（ローカル開発時の既定保存先）
+/.data

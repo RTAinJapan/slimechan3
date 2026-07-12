@@ -1,0 +1,20 @@
+services:
+  slimechan3:
+    build: .
+    image: slimechan3
+    # 環境変数は .env から読み込む（.env はコミットしない。.env.sample を参照）。
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-3000}:3000"
+    # 同 PC（ホスト）で動く NodeCG に host.docker.internal で到達できるようにする。
+    # Linux でも host-gateway により解決可能。
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # 投票〆トグルの状態を再起動後も保持する。
+    volumes:
+      - slimechan3-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  slimechan3-data:

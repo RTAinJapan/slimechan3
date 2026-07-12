@@ -1,0 +1,19 @@
+{
+	"name": "slimechan3",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+	"postCreateCommand": "npm ci",
+	"forwardPorts": [3000],
+	"customizations": {
+		"vscode": {
+			"extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
+			"settings": {
+				"editor.formatOnSave": true,
+				"editor.defaultFormatter": "esbenp.prettier-vscode"
+			}
+		}
+	},
+	"remoteEnv": {
+		"// host の NodeCG に届かせるには .env.local で次を指定する": "",
+		"// NODECG_URL": "http://host.docker.internal:9090"
+	}
+}

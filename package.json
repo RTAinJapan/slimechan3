@@ -1,0 +1,42 @@
+{
+	"name": "slimechan3",
+	"version": "0.1.0",
+	"private": true,
+	"description": "RTA in Japan の配信席で、今/次/次の次のゲーム情報を一画面に集約表示するビューア",
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"format": "prettier \"**/*.{ts,tsx,js,mjs,json,css,md,yml,yaml}\" --write",
+		"format:check": "prettier \"**/*.{ts,tsx,js,mjs,json,css,md,yml,yaml}\" --check",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"@emotion/react": "^11.14.0",
+		"@emotion/styled": "^11.14.0",
+		"@mui/icons-material": "^7.0.0",
+		"@mui/material": "^7.0.0",
+		"@mui/material-nextjs": "^7.0.0",
+		"next": "^15.1.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"server-only": "^0.0.1",
+		"socket.io-client": "^4.8.1",
+		"swr": "^2.2.5",
+		"xlsx": "^0.18.5"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.0",
+		"@types/react": "^19.0.0",
+		"@types/react-dom": "^19.0.0",
+		"eslint": "^8.57.1",
+		"eslint-config-next": "^15.1.0",
+		"eslint-config-prettier": "^9.1.0",
+		"prettier": "^3.4.2",
+		"typescript": "^5.7.0",
+		"vitest": "^2.1.8"
+	}
+}

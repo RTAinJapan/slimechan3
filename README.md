@@ -102,17 +102,23 @@ GitHub Actions の `slimechan3-standalone` アーティファクトは、**展�
 
 1. Actions の実行結果から `slimechan3-standalone` をダウンロードし、任意の場所に展開する
 2. 展開先で `.env.sample` をコピーして `.env` を作成し、値を設定する（最低限 `SCHEDULE_XLSX_URL`）
-3. `node server.js` で起動し、ブラウザで `http://localhost:3000` を開く
+3. 同梱の起動スクリプトで起動し、ブラウザで `http://localhost:3000` を開く
+   - Windows: `start.cmd`
+   - macOS / Linux: `sh start.sh`
 
 ```bash
 cd <展開先>
 cp .env.sample .env   # 値を設定
-node server.js
+sh start.sh
 ```
 
+- 起動スクリプトは Next.js 内部由来の無害な非推奨警告（DEP0169 / `url.parse()`）を
+  抑止して `node server.js` を実行する。直接 `node server.js` でも動作は同じ
+  （警告が表示されるだけ）。
 - `.env` は展開先直下（`server.js` と同じ場所）に置けば自動で読み込まれる。
 - ただし待受ポートだけは `.env` では変わらない。変更する場合は
-  `PORT=3001 node server.js` のように環境変数で指定する。
+  `PORT=3001 sh start.sh` のように環境変数で指定する
+  （`NODE_OPTIONS` も同様に `.env` では効かない）。
 - 同梱の `START.md` にも同じ手順を記載している。
 
 ### 手元でビルドする場合

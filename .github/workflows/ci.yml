@@ -32,29 +32,7 @@ jobs:
           cp -r .next/static dist/.next/static
           cp -r public dist/public
           cp .env.sample dist/.env.sample
-          cat > dist/START.md << 'EOF'
-          # slimechan3 の起動方法
-
-          この zip を展開したディレクトリで、以下を実行してください。
-
-          1. `.env.sample` をコピーして `.env` を作成し、値を設定する
-             （最低限 `SCHEDULE_XLSX_URL` が必要）
-
-                 cp .env.sample .env
-
-          2. Node.js (v20 以降推奨) で起動する
-
-                 node server.js
-
-             `.env` は server.js が自動で読み込みます。
-             ただし待受ポートだけは `.env` では変わらないため、変更したい場合は
-
-                 PORT=3001 node server.js
-
-             のように環境変数で指定してください。
-
-          3. ブラウザで http://localhost:3000 を開く
-          EOF
+          cp deploy/START.md deploy/start.sh deploy/start.cmd dist/
       - name: Upload standalone bundle
         uses: actions/upload-artifact@v4
         with:

@@ -16,7 +16,9 @@ RTA in Japan の配信席で、**今のゲーム / 次のゲーム / 次の次�
   **行番号に依存せず毎回全件を再解析**して `pk` で突き合わせる。
 - **NodeCG** へは socket.io（v4）でサーバーから接続し、`current-run` の `pk` のみを取得する。
   next / next-next の順序は xlsx 側を正として算出する。
-- クライアントは API（`/api/games`, `/api/pointer`）を SWR でポーリングして描画する。
+- クライアントはゲーム情報（`/api/games`）を SWR でポーリングし、NodeCG の
+  ゲーム切り替えは SSE（`/api/pointer/stream`）で即時受信する（不通時は
+  `/api/pointer` の低頻度ポーリングにフォールバック）。
 - スプレッドシート URL は**サーバー専用の環境変数**で渡し、リポジトリにもクライアント
   バンドルにも露出させない。
 

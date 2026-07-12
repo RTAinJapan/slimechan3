@@ -1,5 +1,6 @@
 "use client";
 
+import {useEffect, useState} from "react";
 import useSWR from "swr";
 import type {BidProgress, GamesData, VoteOverrides} from "@/lib/domain/types";
 import type {Pointer} from "@/lib/nodecg/types";
@@ -18,12 +19,37 @@ export const useGames = () =>
 		revalidateOnFocus: false,
 	});
 
-// NodeCG ポインタは追従性のため 3 秒間隔。連動 OFF 時は停止。
-export const usePointer = (enabled: boolean) =>
-	useSWR<Pointer>(enabled ? "/api/pointer" : null, fetcher, {
-		refreshInterval: 3_000,
-		revalidateOnFocus: false,
-	});
+// NodeCG ポインタ。SSE(/api/pointer/stream) で変化を即時受信し、
+// SSE 不通時の保険として 15 秒間隔のポーリングを併用する。連動 OFF 時は停止。
+export const usePointerLive = (enabled: boolean): Pointer | undefined => {
+	const {data: polled} = useSWR<Pointer>(
+		enabled ? "/api/pointer" : null,
+		fetcher,
+		{refreshInterval: 15_000, revalidateOnFocus: false},
+	);
+
+	const [sse, setSse] = useState<Pointer | undefined>(undefined);
+	useEffect(() => {
+		if (!enabled) {
+			setSse(undefined);
+			return;
+		}
+		const es = new EventSource("/api/pointer/stream");
+		es.onmessage = (ev) => {
+			try {
+				setSse(JSON.parse(ev.data) as Pointer);
+			} catch {
+				// 壊れたイベントは無視する。
+			}
+		};
+		// 切断中は古い SSE 値を捨ててポーリング値へフォールバックする。
+		// 再接続は EventSource が自動で行う。
+		es.onerror = () => setSse(undefined);
+		return () => es.close();
+	}, [enabled]);
+
+	return sse ?? polled;
+};
 
 // 投票項目の進捗（Tracker）。bid 単位 7 秒キャッシュなので ~7 秒間隔で十分。
 export const useBidProgress = (ids: number[]) => {

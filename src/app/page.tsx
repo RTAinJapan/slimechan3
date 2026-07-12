@@ -21,7 +21,7 @@ import {
 	useBidProgress,
 	useClientConfig,
 	useGames,
-	usePointer,
+	usePointerLive,
 	useVoteOverrides,
 } from "@/lib/client/hooks";
 import {initSheetWrite, writeVoteClosedToSheet} from "@/lib/client/sheetWrite";
@@ -43,7 +43,7 @@ const SOURCE_LABEL: Record<Source, string> = {
 export default function Home() {
 	const {linked, manualPk, setManualPk} = useAppState();
 	const {data: games, error, isLoading} = useGames();
-	const {data: pointer} = usePointer(linked);
+	const pointer = usePointerLive(linked);
 
 	// 時刻推定用に現在時刻を定期更新する（SSR とのズレを避け、マウント後に開始）。
 	const [nowMs, setNowMs] = useState(0);

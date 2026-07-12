@@ -24,6 +24,22 @@ let state: Pointer = {
 	lastUpdate: null,
 };
 
+// SSE 配信用の変更通知。currentPk / nextPk / online が実際に変わった時だけ呼ぶ
+// （再接続リトライのたびに通知してクライアントを起こさないため）。
+type PointerListener = (p: Pointer) => void;
+const listeners = new Set<PointerListener>();
+
+const setState = (next: Pointer) => {
+	const changed =
+		next.currentPk !== state.currentPk ||
+		next.nextPk !== state.nextPk ||
+		next.online !== state.online;
+	state = next;
+	if (changed) {
+		for (const listener of listeners) listener(state);
+	}
+};
+
 const pkOf = (v: unknown): number | null => {
 	if (v && typeof v === "object" && "pk" in v) {
 		const pk = (v as {pk?: unknown}).pk;
@@ -35,9 +51,9 @@ const pkOf = (v: unknown): number | null => {
 const apply = (name: string, run: RunLike) => {
 	const pk = pkOf(run);
 	if (name === "current-run") {
-		state = {...state, currentPk: pk, online: true, lastUpdate: Date.now()};
+		setState({...state, currentPk: pk, online: true, lastUpdate: Date.now()});
 	} else if (name === "next-run") {
-		state = {...state, nextPk: pk, online: true, lastUpdate: Date.now()};
+		setState({...state, nextPk: pk, online: true, lastUpdate: Date.now()});
 	}
 };
 
@@ -74,14 +90,14 @@ const ensure = () => {
 	socket = s;
 
 	s.on("connect", () => {
-		state = {...state, online: true};
+		setState({...state, online: true});
 		refresh();
 	});
 	s.on("disconnect", () => {
-		state = {...state, online: false};
+		setState({...state, online: false});
 	});
 	s.on("connect_error", () => {
-		state = {...state, online: false};
+		setState({...state, online: false});
 	});
 	s.io.on("reconnect", refresh);
 
@@ -103,4 +119,13 @@ const ensure = () => {
 export const getPointer = (): Pointer => {
 	ensure();
 	return state;
+};
+
+// ポインタ変化の購読（SSE 用）。解除関数を返す。
+export const subscribePointer = (listener: PointerListener): (() => void) => {
+	ensure();
+	listeners.add(listener);
+	return () => {
+		listeners.delete(listener);
+	};
 };

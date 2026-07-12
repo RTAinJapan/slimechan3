@@ -253,7 +253,7 @@ export default function Home() {
 						gap: 1,
 					}}
 				>
-					<EventsBlock events={eventsBeforeCurrent} />
+					<EventsBlock events={eventsBeforeCurrent} variant='prominent' />
 					<Box sx={{flexGrow: 1, minHeight: 0}}>
 						<CurrentGameBlock
 							game={trio.current}

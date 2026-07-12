@@ -15,7 +15,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import {useAppState, useThemeMode} from "@/components/Providers";
-import {useClientConfig} from "@/lib/client/hooks";
+import {formatTime} from "@/lib/client/format";
+import {useClientConfig, useGames} from "@/lib/client/hooks";
 
 type Props = {
 	online?: boolean;
@@ -26,6 +27,7 @@ export const MenuBar = ({online, showNav = true}: Props) => {
 	const {mode, toggle} = useThemeMode();
 	const {linked, setLinked} = useAppState();
 	const {data: clientConfig} = useClientConfig();
+	const {data: games} = useGames();
 
 	return (
 		<AppBar position='static' color='default' enableColorOnDark>
@@ -62,6 +64,12 @@ export const MenuBar = ({online, showNav = true}: Props) => {
 						variant={online ? "filled" : "outlined"}
 						label={online ? "NodeCG接続中" : "NodeCG未接続"}
 					/>
+				)}
+
+				{games?.fetchedAt && (
+					<Typography variant='caption' color='text.disabled' sx={{ml: 1}}>
+						シート取得時刻 {formatTime(games.fetchedAt)}
+					</Typography>
 				)}
 
 				<Box sx={{flexGrow: 1}} />

@@ -7,6 +7,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import {formatTime} from "@/lib/client/format";
 import type {BidProgress, VoteOverrides, Voting} from "@/lib/domain/types";
 
 const yen = (n?: number) =>
@@ -142,17 +143,24 @@ const VotingItem = ({
 					〆タイミング: {voting.closeTiming}
 				</Typography>
 			)}
-			{voting.trackerLink && (
-				<Box>
-					<Link
-						href={voting.trackerLink}
-						target='_blank'
-						rel='noopener'
-						variant='caption'
-					>
-						Tracker を開く
-					</Link>
-				</Box>
+			{(voting.trackerLink || progress?.fetchedAt) && (
+				<Stack direction='row' spacing={1.5} alignItems='baseline'>
+					{voting.trackerLink && (
+						<Link
+							href={voting.trackerLink}
+							target='_blank'
+							rel='noopener'
+							variant='caption'
+						>
+							Tracker を開く
+						</Link>
+					)}
+					{progress?.fetchedAt && (
+						<Typography variant='caption' color='text.disabled'>
+							取得時刻 {formatTime(progress.fetchedAt)}
+						</Typography>
+					)}
+				</Stack>
 			)}
 		</Box>
 	);

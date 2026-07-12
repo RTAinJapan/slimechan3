@@ -63,6 +63,7 @@ const fetchBid = async (id: number): Promise<BidProgress | null> => {
 		count: typeof f.count === "number" ? f.count : undefined,
 		isChoice,
 		options: isChoice ? await fetchOptions(id) : undefined,
+		fetchedAt: Date.now(),
 	};
 };
 

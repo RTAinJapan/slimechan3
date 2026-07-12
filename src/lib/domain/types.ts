@@ -35,6 +35,7 @@ export type BidProgress = {
 	isChoice?: boolean; // 選択式投票（bidwar）か
 	// 選択式投票の各選択肢（金額の降順）。
 	options?: {name: string; total: number}[];
+	fetchedAt?: number; // Tracker から実際に取得した時刻（キャッシュ返却時は取得元の時刻）
 };
 
 // 投票〆トグルのアプリ側オーバーライド（key -> closed）。
